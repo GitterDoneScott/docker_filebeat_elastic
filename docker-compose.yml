@@ -11,7 +11,7 @@ services:
     volumes:
       - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro        
+      - /var/run/docker.sock:/var/run/docker.sock:ro
       - /var/log:/host-logs
     restart: always
     user: root
@@ -52,6 +52,49 @@ services:
       container_group: logging
     environment:
       - NODE_OPTIONS=--max-old-space-size=4096 #Elastalert needs more memory to install plugin 
+
+
+##########################################################
+# Generate Logs###
+
+  apache-common-logs:
+    image: mingrammer/flog
+    command: --format apache_common --delay 5 -loop --number 10
+    labels:
+      co.elastic.logs/module: apache2
+      #co.elastic.logs/fileset.stdout: access
+      #co.elastic.logs/fileset.stderr: error
+
+  apache-combined-logs:
+    image: mingrammer/flog
+    command: --format apache_combined --delay 5 -loop --number 10
+    labels:
+      co.elastic.logs/module: apache2
+      #co.elastic.logs/fileset.stdout: access
+      #co.elastic.logs/fileset.stderr: error
+
+  apache-error-logs:
+    image: mingrammer/flog
+    command: --format apache_error --delay 5 -loop --number 10
+    labels:
+      co.elastic.logs/module: apache2
+      #co.elastic.logs/fileset.stdout: access
+      #co.elastic.logs/fileset.stderr: error
+
+  syslog-logs:
+    image: mingrammer/flog
+    command: --format rfc3164 --delay 5 -loop --number 10
+    labels:
+      co.elastic.logs/module: system
+      #co.elastic.logs/fileset.stdout: access
+      #co.elastic.logs/fileset.stderr: error
+
+  nginx-logs:
+    image: liubin/nginx-log-generator
+    labels:
+      co.elastic.logs/module: nginx
+      #co.elastic.logs/fileset.stdout: access
+      #co.elastic.logs/fileset.stderr: error
 
 
 #########################################################
