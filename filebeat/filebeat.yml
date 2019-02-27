@@ -9,9 +9,22 @@ filebeat.autodiscover:
       hints.enabled: true
 
 processors:
-- add_cloud_metadata: ~
+- add_docker_metadata: ~
+- add_host_metadata: ~
 
 output.elasticsearch:
   hosts: '${ELASTICSEARCH_HOSTS:elasticsearch:9200}'
   username: '${ELASTICSEARCH_USERNAME:}'
   password: '${ELASTICSEARCH_PASSWORD:}'
+  
+  ilm.enabled: true
+  ilm.rollover_alias: "filebeat"
+  ilm.pattern: "{now/d}-000001"
+
+setup.kibana.host: kibana:5601
+setup.dashboards.enabled: true
+setup.dashboards.retry.enabled: true
+setup.dashboards.retry.interval: 1m
+setup.dashboards.retry.maximum: 0
+
+
